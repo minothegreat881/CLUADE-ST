@@ -1,15 +1,42 @@
-// Example: fetch data from Strapi public API endpoint
-// Update BASE_URL to match your Strapi backend
+// Updated app.js for local Strapi connection
 const BASE_URL = 'http://localhost:1337/api';
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetch(`${BASE_URL}/posts`)
-        .then(res => res.json())
-        .then(data => {
-            const container = document.getElementById('data');
-            container.innerHTML = JSON.stringify(data, null, 2);
-        })
-        .catch(err => {
-            console.error('Error fetching from Strapi:', err);
-        });
-});
+async function fetchPosts() {
+    try {
+        const response = await fetch(`${BASE_URL}/posts?populate=*`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        displayPosts(data.data);
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        document.getElementById('data').innerHTML = 
+            '<p style="color: red;">Error loading posts. Make sure Strapi is running on localhost:1337</p>';
+    }
+}
+
+function displayPosts(posts) {
+    const postsContainer = document.getElementById('data');
+    
+    if (!posts || posts.length === 0) {
+        postsContainer.innerHTML = '<p>No posts found. Create some posts in the admin panel!</p>';
+        return;
+    }
+    
+    postsContainer.innerHTML = posts.map(post => {
+        const attributes = post.attributes;
+        return `
+            <div class="post">
+                <h3>${attributes.title}</h3>
+                <div class="content">${attributes.content || 'No content'}</div>
+                <small>Published: ${new Date(attributes.publishedAt).toLocaleDateString()}</small>
+            </div>
+        `;
+    }).join('');
+}
+
+// Load posts when page loads
+document.addEventListener('DOMContentLoaded', fetchPosts);
