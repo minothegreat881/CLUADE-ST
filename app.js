@@ -1,5 +1,6 @@
 // Updated app.js for local Strapi connection
-const BASE_URL = 'http://localhost:1337/api';
+const BASE_URL = 'https://integral-action-7f417e6ef6.strapiapp.com/api';
+
 
 async function fetchPosts() {
     try {
